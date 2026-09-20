@@ -1,0 +1,21 @@
+# Diretório de arquivos temporários de compilação
+temp/*
+!temp/.gitkeep
+
+# Dependências do Node (caso algum pacote seja adicionado)
+node_modules/
+
+# Logs e dumps
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos do sistema operacional
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
