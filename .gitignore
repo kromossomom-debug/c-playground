@@ -2,6 +2,21 @@
 temp/*
 !temp/.gitkeep
 
+# Binários e executáveis gerados por execuções do usuário
+*.exe
+*.o
+*.obj
+*.out
+*.bin
+# Garantir que os binários do compilador portátil continuem rastreados
+!compiler/**
+
+# Relatórios e saídas de texto geradas por testes
+historico_*.txt
+relatorio_*.txt
+saida_*.txt
+output_*.txt
+
 # Dependências do Node (caso algum pacote seja adicionado)
 node_modules/
 

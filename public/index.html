@@ -36,13 +36,33 @@
             <option value="hello">1. Olá Mundo (Básico)</option>
             <option value="input">2. Leitura com scanf (Entrada)</option>
             <option value="vetores">3. Vetores & Estatísticas</option>
-            <option value="restaurante">4. Restaurante Fast Food (Vetor + Exportação)</option>
+            <option value="gestao">4. Gestão de Dados & Arquivos (Structs + Exportação)</option>
             <option value="pedidos">5. Sistema de Pedidos Simples (Structs)</option>
             <option value="ponteiros">6. Ponteiros & Troca de Valores</option>
           </select>
         </div>
 
-        <button id="btnDownloadExe" class="btn btn-secondary" title="Compilar e baixar o executável .exe para Windows">
+        <!-- Abrir arquivo local C -->
+        <input type="file" id="fileInput" accept=".c,.h,.txt" style="display:none;" />
+        <button id="btnOpenFile" class="btn btn-secondary" title="Abrir arquivo de código C do seu computador">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Abrir .C</span>
+        </button>
+
+        <!-- Salvar código C ativo -->
+        <button id="btnSaveCode" class="btn btn-secondary" title="Baixar arquivo de código C (.c) para o computador">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>Salvar .C</span>
+        </button>
+
+        <!-- Baixar Executável -->
+        <button id="btnDownloadExe" class="btn btn-secondary" title="Compilar e baixar executável compilado (.exe)">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -68,7 +88,7 @@
         <div class="panel-header">
           <div class="tab-item active">
             <span class="file-icon">C</span>
-            <span class="file-name">main.c</span>
+            <span class="file-name" id="currentFileName">main.c</span>
           </div>
           <div class="panel-tools">
             <button id="btnCopyCode" class="tool-btn" title="Copiar código C">

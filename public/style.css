@@ -404,6 +404,13 @@ body {
   display: flex;
   height: 100%;
   width: 100%;
+  transition: var(--transition-fast);
+}
+
+.editor-wrapper.drag-over {
+  outline: 2px dashed var(--accent-cyan);
+  outline-offset: -3px;
+  background: rgba(6, 182, 212, 0.05);
 }
 
 .line-numbers {

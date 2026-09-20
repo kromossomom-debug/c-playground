@@ -79,50 +79,81 @@ int main() {
 `,
     input: ""
   },
-  restaurante: {
-    title: "Restaurante Fast Food (Vetor + Exportação)",
+  gestao: {
+    title: "Gestão de Dados & Arquivos (Structs + Exportação)",
     code: `#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define CAPACIDADE_MAXIMA 100
+#define MAX_ITENS 100
 
+// Estrutura para representar registros de produtos/itens em memoria
 typedef struct {
     int id;
-    char cliente[50];
-    char descricao[100];
-    int status; // 1: Aguardando, 2: Pronto, 3: Entregue
-} Pedido;
+    char titulo[50];
+    char categoria[30];
+    int quantidade;
+    float preco;
+} Item;
 
-void exportarDadosDoDia(Pedido vetorPedidos[], int totalPedidos) {
-    if (totalPedidos == 0) {
-        printf("\\n[AVISO] Nao ha pedidos no vetor para exportar!\\n");
+// Funcao para salvar o relatorio formatado em disco
+void exportarRelatorio(Item lista[], int total) {
+    if (total == 0) {
+        printf("\\n[AVISO] Nenhum item cadastrado para exportacao.\\n");
         return;
     }
-    printf("\\n===================================================================\\n");
-    printf("        EXPORTACAO: RELATORIO DIARIO SALVO COM SUCESSO!            \\n");
-    printf("===================================================================\\n");
-    for (int i = 0; i < totalPedidos; i++) {
-        printf("Posicao [%02d] | ID: #%03d\\n", i, vetorPedidos[i].id);
-        printf("Cliente       : %s\\n", vetorPedidos[i].cliente);
-        printf("Descricao     : %s\\n", vetorPedidos[i].descricao);
-        printf("Status        : %s\\n", vetorPedidos[i].status == 1 ? "Aguardando" : (vetorPedidos[i].status == 2 ? "Pronto" : "Entregue"));
-        printf("-------------------------------------------------------------------\\n");
+
+    const char *nomeArquivo = "relatorio_inventario.txt";
+    FILE *arquivo = fopen(nomeArquivo, "w");
+
+    if (arquivo == NULL) {
+        printf("[ERRO] Falha ao criar o arquivo no disco.\\n");
+        return;
     }
-    printf("Total exportado: %d pedidos.\\n", totalPedidos);
-    printf("===================================================================\\n");
+
+    fprintf(arquivo, "=========================================================\\n");
+    fprintf(arquivo, "             RELATORIO GERAL DE INVENTARIO               \\n");
+    fprintf(arquivo, "=========================================================\\n");
+
+    float totalGeral = 0.0f;
+    for (int i = 0; i < total; i++) {
+        float subtotal = lista[i].quantidade * lista[i].preco;
+        totalGeral += subtotal;
+
+        fprintf(arquivo, "ID: #%03d | %-20s | Cat: %-12s\\n", 
+                lista[i].id, lista[i].titulo, lista[i].categoria);
+        fprintf(arquivo, "Qtd: %-4d | Unitario: R$ %7.2f | Subtotal: R$ %7.2f\\n",
+                lista[i].quantidade, lista[i].preco, subtotal);
+        fprintf(arquivo, "---------------------------------------------------------\\n");
+    }
+
+    fprintf(arquivo, "Total de Registros: %d | Faturamento Total: R$ %.2f\\n", total, totalGeral);
+    fprintf(arquivo, "=========================================================\\n");
+    fclose(arquivo);
+
+    printf("[SUCESSO] Relatorio gerado com sucesso em '%s'!\\n", nomeArquivo);
 }
 
 int main() {
-    Pedido pedidos[2] = {
-        {1, "Lucas Silva", "X-Burguer Duplo com Fritas", 2},
-        {2, "Mariana Ramos", "Combo Especial Refrigerante", 1}
+    Item estoque[3] = {
+        {101, "Monitor 24 Pol", "Perifericos", 15, 899.90f},
+        {102, "Teclado Mecanico", "Acessorios", 30, 249.50f},
+        {103, "Cabo USB-C 2m",   "Cabos",      50,  39.90f}
     };
-    int total = 2;
+    int total = 3;
 
-    printf("=== RESTAURANTE FAST FOOD (VETOR) ===\\n");
-    printf("Pedidos carregados no vetor:\\n\\n");
-    exportarDadosDoDia(pedidos, total);
+    printf("=== SISTEMA DE GESTAO DE ESTOQUE ===\\n");
+    printf("Total de registros ativos: %d\\n\\n", total);
+
+    for (int i = 0; i < total; i++) {
+        printf("[%d] #%03d %-18s (Cat: %-10s) | Qtd: %2d | R$ %.2f\\n",
+               i, estoque[i].id, estoque[i].titulo, estoque[i].categoria, 
+               estoque[i].quantidade, estoque[i].preco);
+    }
+
+    printf("\\nIniciando exportacao para arquivo em disco...\\n");
+    exportarRelatorio(estoque, total);
+
     return 0;
 }
 `,
@@ -210,7 +241,11 @@ int main() {
 const codeEditor = document.getElementById('codeEditor');
 const lineNumbers = document.getElementById('lineNumbers');
 const cursorPosition = document.getElementById('cursorPosition');
+const currentFileName = document.getElementById('currentFileName');
 const btnRun = document.getElementById('btnRun');
+const btnOpenFile = document.getElementById('btnOpenFile');
+const fileInput = document.getElementById('fileInput');
+const btnSaveCode = document.getElementById('btnSaveCode');
 const btnDownloadExe = document.getElementById('btnDownloadExe');
 const templateSelect = document.getElementById('templateSelect');
 const btnCopyCode = document.getElementById('btnCopyCode');
@@ -502,13 +537,16 @@ async function downloadExe() {
     return;
   }
 
+  const baseName = (currentFileName?.textContent || 'programa.c').replace(/\.[^/.]+$/, '');
+  const outName = `${baseName}.exe`;
+
   showToast('Compilando executável .exe...', 'info');
 
   try {
     const res = await fetch('/api/download-exe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, filename: 'meu_programa.exe' })
+      body: JSON.stringify({ code, filename: outName })
     });
 
     if (!res.ok) {
@@ -522,13 +560,13 @@ async function downloadExe() {
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = url;
-    a.download = 'meu_programa.exe';
+    a.download = outName;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
 
-    showToast('Download do executável concluído!', 'success');
+    showToast(`Download de "${outName}" concluído!`, 'success');
   } catch (err) {
     showToast('Falha no download: ' + err.message, 'error');
   }
@@ -537,15 +575,94 @@ async function downloadExe() {
 btnDownloadExe.addEventListener('click', downloadExe);
 
 // ==========================================================================
+// Abertura e Salvamento de Arquivos C Locais
+// ==========================================================================
+btnOpenFile.addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    codeEditor.value = event.target.result;
+    if (currentFileName) currentFileName.textContent = file.name;
+    updateLineNumbers();
+    updateCursorPosition();
+    showToast(`Arquivo "${file.name}" aberto com sucesso!`, 'success');
+  };
+  reader.onerror = () => {
+    showToast('Erro ao ler o arquivo selecionado.', 'error');
+  };
+  reader.readAsText(file);
+});
+
+// Salvar / Baixar Código C (.c)
+btnSaveCode.addEventListener('click', () => {
+  const code = codeEditor.value;
+  if (!code.trim()) {
+    showToast('Editor vazio. Nenhum código para salvar.', 'info');
+    return;
+  }
+  const baseName = (currentFileName?.textContent || 'main.c');
+  const filename = baseName.endsWith('.c') ? baseName : `${baseName}.c`;
+  const blob = new Blob([code], { type: 'text/x-csrc;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Código salvo como "${filename}"!`, 'success');
+});
+
+// Suporte a Arrastar e Soltar (Drag & Drop) de arquivos .c no editor
+const editorWrapper = document.querySelector('.editor-wrapper');
+if (editorWrapper) {
+  editorWrapper.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    editorWrapper.classList.add('drag-over');
+  });
+  editorWrapper.addEventListener('dragleave', () => {
+    editorWrapper.classList.remove('drag-over');
+  });
+  editorWrapper.addEventListener('drop', (e) => {
+    e.preventDefault();
+    editorWrapper.classList.remove('drag-over');
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        codeEditor.value = event.target.result;
+        if (currentFileName) currentFileName.textContent = file.name;
+        updateLineNumbers();
+        updateCursorPosition();
+        showToast(`Arquivo "${file.name}" importado no editor!`, 'success');
+      };
+      reader.readAsText(file);
+    }
+  });
+}
+
+// ==========================================================================
 // Seleção de Exemplos / Templates
 // ==========================================================================
 templateSelect.addEventListener('change', (e) => {
   const key = e.target.value;
   if (TEMPLATES[key]) {
     codeEditor.value = TEMPLATES[key].code;
+    if (currentFileName) currentFileName.textContent = 'main.c';
     if (TEMPLATES[key].input) {
       stdinInput.value = TEMPLATES[key].input;
       inputIndicator.textContent = stdinInput.value.trim().length;
+    } else {
+      stdinInput.value = '';
+      inputIndicator.textContent = '0';
     }
     updateLineNumbers();
     updateCursorPosition();
