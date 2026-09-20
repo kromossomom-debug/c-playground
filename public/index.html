@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>C-Studio — Compilador & Playground C</title>
+  <meta name="description" content="Ambiente interativo completo para programar, compilar, executar e exportar códigos em linguagem C diretamente no navegador.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation / Header -->
+    <header class="app-header">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">
+          <span>C</span>
+        </div>
+        <div class="brand-text">
+          <h1 class="brand-title">C-Studio</h1>
+          <span class="brand-subtitle">Compilador & Playground C</span>
+        </div>
+        <div class="compiler-badge" id="compilerStatusBadge" title="Status do Compilador">
+          <span class="status-dot"></span>
+          <span id="compilerStatusText">Verificando compilador...</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="template-wrapper">
+          <label for="templateSelect" class="sr-only">Escolher Exemplo</label>
+          <select id="templateSelect" class="select-input" title="Carregar exemplo de código">
+            <option value="" disabled selected>📂 Exemplos Prontos...</option>
+            <option value="hello">1. Olá Mundo (Básico)</option>
+            <option value="input">2. Leitura com scanf (Entrada)</option>
+            <option value="vetores">3. Vetores & Estatísticas</option>
+            <option value="restaurante">4. Restaurante Fast Food (Vetor + Exportação)</option>
+            <option value="pedidos">5. Sistema de Pedidos Simples (Structs)</option>
+            <option value="ponteiros">6. Ponteiros & Troca de Valores</option>
+          </select>
+        </div>
+
+        <button id="btnDownloadExe" class="btn btn-secondary" title="Compilar e baixar o executável .exe para Windows">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Baixar .EXE</span>
+        </button>
+
+        <button id="btnRun" class="btn btn-primary" title="Compilar e Rodar o Código (Atalho: Ctrl + Enter)">
+          <svg class="icon play-icon" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"/>
+          </svg>
+          <span class="btn-text">Executar</span>
+          <kbd class="shortcut-tag">Ctrl ↵</kbd>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace: Split Pane -->
+    <main class="workspace">
+      <!-- Left Panel: Code Editor -->
+      <section class="panel editor-panel" aria-label="Editor de Código C">
+        <div class="panel-header">
+          <div class="tab-item active">
+            <span class="file-icon">C</span>
+            <span class="file-name">main.c</span>
+          </div>
+          <div class="panel-tools">
+            <button id="btnCopyCode" class="tool-btn" title="Copiar código C">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Copiar</span>
+            </button>
+            <button id="btnClearCode" class="tool-btn" title="Limpar editor">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Limpar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-body">
+          <div class="editor-wrapper">
+            <div id="lineNumbers" class="line-numbers" aria-hidden="true"></div>
+            <textarea
+              id="codeEditor"
+              class="code-textarea"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+              placeholder="// Escreva ou cole seu código C aqui..."
+              aria-label="Área de edição de código C"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="panel-footer editor-footer">
+          <div class="editor-stats">
+            <span id="cursorPosition">Lin 1, Col 1</span>
+            <span class="footer-separator">•</span>
+            <span>Espaços: 4</span>
+            <span class="footer-separator">•</span>
+            <span>UTF-8</span>
+          </div>
+          <div class="compiler-label">
+            <span class="badge-lang">C99 / C11 NATIVO</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Output & Stdin -->
+      <section class="panel output-panel" aria-label="Console e Entrada">
+        <div class="panel-header tabs-header">
+          <div class="tabs-group" role="tablist">
+            <button id="tabBtnOutput" class="tab-btn active" role="tab" aria-selected="true" aria-controls="outputTab">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="4 17 10 11 4 5"></polyline>
+                <line x1="12" y1="19" x2="20" y2="19"></line>
+              </svg>
+              <span>Terminal de Saída</span>
+              <span id="outputBadge" class="tab-badge empty">Vazio</span>
+            </button>
+            <button id="tabBtnInput" class="tab-btn" role="tab" aria-selected="false" aria-controls="inputTab">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Entrada (STDIN)</span>
+              <span id="inputIndicator" class="tab-badge input-indicator">0</span>
+            </button>
+          </div>
+
+          <div class="panel-tools">
+            <button id="btnCopyOutput" class="tool-btn" title="Copiar saída do terminal">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Copiar</span>
+            </button>
+            <button id="btnClearOutput" class="tool-btn" title="Limpar terminal">
+              <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+              <span>Limpar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="output-body">
+          <!-- Terminal View -->
+          <div id="outputTab" class="tab-pane active" role="tabpanel">
+            <div id="terminal" class="terminal-content">
+              <div class="terminal-welcome">
+                <div class="welcome-icon">⚡</div>
+                <div class="welcome-text">
+                  <h3>Pronto para compilar</h3>
+                  <p>Escreva seu código em C à esquerda e clique em <strong>Executar</strong> ou pressione <code>Ctrl + Enter</code>.</p>
+                  <p class="welcome-hint">Se seu código usa <code>scanf()</code>, preencha a aba <strong>Entrada (STDIN)</strong> antes de rodar.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STDIN Input View -->
+          <div id="inputTab" class="tab-pane" role="tabpanel" hidden>
+            <div class="stdin-container">
+              <div class="stdin-header-info">
+                <span class="stdin-title">Entrada Padrão para scanf() e fgets()</span>
+                <span class="stdin-tip">Coloque cada dado em uma nova linha</span>
+              </div>
+              <textarea
+                id="stdinInput"
+                class="stdin-textarea"
+                placeholder="Exemplo para um programa que lê nome e idade:&#10;Carlos&#10;28&#10;&#10;Cada entrada será enviada automaticamente quando o programa solicitar."
+                spellcheck="false"
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-footer output-footer">
+          <div class="metrics-group">
+            <div class="metric-item">
+              <span class="metric-label">Status:</span>
+              <span id="metricStatus" class="metric-value">Aguardando</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Tempo:</span>
+              <span id="metricTime" class="metric-value">--</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-label">Retorno:</span>
+              <span id="metricExitCode" class="metric-value">--</span>
+            </div>
+          </div>
+          <div class="quick-tip">
+            <span>Dica: <code>Ctrl + Enter</code> executa imediatamente</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toastNotification" class="toast" role="alert" aria-live="polite"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

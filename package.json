@@ -1,0 +1,12 @@
+{
+  "name": "c-studio-playground",
+  "version": "1.0.0",
+  "description": "Ambiente web local para compilar e rodar programas em C",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["c", "compiler", "playground", "tcc"],
+  "author": "",
+  "license": "MIT"
+}
